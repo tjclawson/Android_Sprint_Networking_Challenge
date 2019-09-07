@@ -47,25 +47,32 @@ class MainActivity : AppCompatActivity(), Callback<Pokemon> {
     override fun onResponse(call: Call<Pokemon>, response: Response<Pokemon>) {
         if(response.isSuccessful) {
 
-            if(count != 0) {
-                count = PokeDex.pokeDex.size
+            if(checkPokemon(response) == 0) {
+
+                if (count != 0) {
+                    count = PokeDex.pokeDex.size
+                }
+                newPokemon = Pokemon(
+                    response.body()?.name,
+                    response.body()?.sprites,
+                    response.body()?.id,
+                    response.body()?.abilities,
+                    response.body()?.types,
+                    count
+                )
+
+                PokeDex.pokeDex.add(newPokemon)
+                Toast.makeText(this, "New Pokemon Added", Toast.LENGTH_LONG).show()
+
+                val intent = Intent(this, DetailActivity::class.java)
+                intent.putExtra(KEY, newPokemon.index)
+                startActivity(intent)
+                recycler_view.adapter?.notifyDataSetChanged()
+
+                count++
+            } else {
+                Toast.makeText(this, "${response.body()?.name} has already been added to PokeDex", Toast.LENGTH_LONG).show()
             }
-            newPokemon = Pokemon(response.body()?.name,
-                response.body()?.sprites,
-                response.body()?.id,
-                response.body()?.abilities,
-                response.body()?.types,
-                count)
-
-            PokeDex.pokeDex.add(newPokemon)
-            Toast.makeText(this, "New Pokemon Added", Toast.LENGTH_LONG).show()
-
-            val intent = Intent(this, DetailActivity::class.java)
-            intent.putExtra(KEY, newPokemon.index)
-            startActivity(intent)
-            recycler_view.adapter?.notifyDataSetChanged()
-
-            count++
 
         } else {
             Toast.makeText(this, "Not a Valid Pokemon ID or Name", Toast.LENGTH_LONG).show()
@@ -74,5 +81,15 @@ class MainActivity : AppCompatActivity(), Callback<Pokemon> {
 
     private fun getPokemon(pokemonId: String){
         pokemonService.getPokemon(pokemonId).enqueue(this)
+    }
+
+    private fun checkPokemon(response: Response<Pokemon>): Int {
+        var result = 0
+        for(i in 0 until PokeDex.pokeDex.size){
+            if(response.body()?.name == PokeDex.pokeDex[i].name){
+                result++
+            }
+        }
+        return result
     }
 }
