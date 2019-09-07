@@ -1,10 +1,26 @@
 package com.example.pokedex
 
-import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
-data class Pokemon(val name: String,
-                   @SerializedName("front_default")
-                   val spriteUrl: String,
-                   val id: String,
-                   val abilities: List<String>,
-                   val types: List<String>)
+//looking at quicktype.io, need class for the ability/type list, and then a class for the names of the type
+class Ability(val name: String)
+
+class Abilities(val ability: Ability)
+
+class Type(val name: String)
+
+class Types(val type: Type)
+
+class Sprites(val front_shiny: String)
+
+class Pokemon(
+            var name: String?,
+            var sprites: Sprites?,
+            var id: Int?,
+            var abilities: List<Abilities>?,
+            var types: List<Types>?,
+            var index: Int): Serializable
+
+object PokeDex {
+    val pokeDex = mutableListOf<Pokemon>()
+}
